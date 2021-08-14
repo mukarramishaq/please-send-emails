@@ -15,7 +15,7 @@ Make sure you have the following items setup on your system:
 1. Take a clone of this repository:
 
    ```shell
-   git clone https://github.com/mukarramishaq/cloud-build-notifications.git
+   git clone https://github.com/mukarramishaq/please-send-emails.git
    ```
 
 2. Rename `.env.sample` file to `.env` and update the values to that of yours.
