@@ -4,5 +4,4 @@ dist
 lib
 logs
 *.log
-assets/images
 .env
