@@ -14,7 +14,10 @@ export const EMAIL_USERS = {
 /**
  * SMTP Credentials
  */
-export const SMTP_CREDENTIALS: SMTPTransport | SMTPTransport.Options | string = {
+export const SMTP_CREDENTIALS:
+    | SMTPTransport
+    | SMTPTransport.Options
+    | string = {
     host: process.env.SMTP_HOST,
     port: +process.env.SMTP_PORT,
     auth: {
@@ -27,6 +30,6 @@ export const SMTP_CREDENTIALS: SMTPTransport | SMTPTransport.Options | string = 
         refreshToken: process.env.SMTP_AUTH_OAUTH2_REFRESH_TOKEN,
     },
     tls: {
-        rejectUnauthorized: false
-    }
+        rejectUnauthorized: false,
+    },
 };
