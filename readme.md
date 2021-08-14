@@ -41,9 +41,9 @@ Update Users in `src/assets/csvs/users.csv`
       2. `email` email address of the user
       3. `birth_date` date of birth in `yyyy-mm-dd` format only
       4. `joining_date` date of joining in `yyyy-mm-dd` format only
-   2. update this file or replace it with yours with similar structure
+   2. update this file or replace it with yours but with similar structure
 
-### How to update email templates
+### How to update email templates or Events
 
 Update email templates in `src/assets/email-templates/` folder. Currently two templates are supported:
 

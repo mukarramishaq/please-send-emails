@@ -9,6 +9,7 @@
     "postbuild": "cpy 'assets' '!**/*.ts' ../lib/ --cwd=src/ --no-overwrite --parents",
     "prestart": "npm run build",
     "start": "node ./lib",
+    "please-send-emails": "node ./lib",
     "test": "echo \"Error: no test specified\" && exit 1",
     "semantic-release": "semantic-release"
   },
