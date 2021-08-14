@@ -1,4 +1,8 @@
 node_modules
 yarn.lock
 dist
+lib
+logs
+*.log
+assets/images
 .env
