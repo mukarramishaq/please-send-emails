@@ -5,11 +5,17 @@ import * as hbs from "handlebars";
 import * as fs from "fs";
 import * as path from "path";
 import { SMTP_CREDENTIALS, EMAIL_USERS } from "./env";
-import { getMonth, getDate, format as formatDate } from "date-fns";
+import {
+    getMonth,
+    getDate,
+    format as formatDate,
+    differenceInYears,
+} from "date-fns";
 import { REGISTERED_EMAIL_TEMPLATES } from "./emailTemplatesRegister";
 import { createLogger, format, transports } from "winston";
+import { pleaseGetContext } from "./context";
 
-const { timestamp, label, prettyPrint } = format;
+const { timestamp, prettyPrint } = format;
 
 export const pleaseSendEmailsIfPending = async (user: UserCsvRow) => {
     const pendings = whatEmailsArePending(user);
@@ -33,14 +39,14 @@ export const whatEmailsArePending = (user: UserCsvRow) => {
     const birthDate = new Date(user.birth_date);
     const anniversaryDate = new Date(user.joining_date);
     const pendingEmails: TemplateRegistry[] = [];
-    if (isThisToday(birthDate)) {
+    if (shallISendForBirthday(birthDate)) {
         pendingEmails.push(
             REGISTERED_EMAIL_TEMPLATES.filter(
                 (t) => t.id === EVENT_TYPES.BIRTHDAY
             ).pop()
         );
     }
-    if (isThisToday(anniversaryDate)) {
+    if (shallISendForAnniversary(anniversaryDate)) {
         pendingEmails.push(
             REGISTERED_EMAIL_TEMPLATES.filter(
                 (t) => t.id === EVENT_TYPES.ANNIVERSARY
@@ -51,14 +57,29 @@ export const whatEmailsArePending = (user: UserCsvRow) => {
 };
 
 /**
- * this tells whether a specific event id due today
+ * this function tells whether a birthday is today AND
+ * are we really need to send an email for this one or not
  * @param date
  */
-export const isThisToday = (date: Date) => {
+export const shallISendForBirthday = (date: Date) => {
     const today = new Date();
     return (
         getMonth(today) === getMonth(date) && getDate(today) === getDate(date)
     );
+};
+
+/**
+ * this function tells whether an anniversary is today AND
+ * are we really need to send an email for this one or not
+ * @param date
+ */
+export const shallISendForAnniversary = (date: Date) => {
+    const today = new Date();
+    const allowedCelebratedAnniversaris = [1, 3, 5, 8, 10, 12, 15, 18, 20];
+    const isToday =
+        getMonth(today) === getMonth(date) && getDate(today) === getDate(date);
+    const numberOfYears = differenceInYears(today, date);
+    return isToday && allowedCelebratedAnniversaris.includes(numberOfYears);
 };
 
 /**
@@ -71,7 +92,7 @@ export const pleaseSendEmail = async (
     template: TemplateRegistry
 ) => {
     const tranporter = pleaseCreateTransport(SMTP_CREDENTIALS);
-    const context = pleaseGetTemplateContext(template, user);
+    const context = pleaseGetContext(template, user);
     const subject = pleaseCompileTemplate(template.subject, context);
     const htmlBody = await pleaseCompileRegisteredTemplate(template, context);
     return tranporter.sendMail({
@@ -81,32 +102,6 @@ export const pleaseSendEmail = async (
         html: htmlBody,
         attachments: template.attachments,
     });
-};
-
-/**
- * this retreive a context object. all the attributes
- * of this context are, might be, being used in the template
- * @param template
- * @param user
- */
-export const pleaseGetTemplateContext = (
-    template: TemplateRegistry,
-    user: UserCsvRow
-) => {
-    const attachments = [...template.attachments];
-    const imageUrl = "cid:" + (attachments.pop()?.cid || "");
-    const data = {
-        userName: user.name,
-        imageUrl,
-    };
-    if (template.id === EVENT_TYPES.BIRTHDAY) {
-        // add other data values to data object
-        // which are used in this template
-    } else if (template.id === EVENT_TYPES.ANNIVERSARY) {
-        // add other data values to data object
-        // which are used in this template
-    }
-    return data;
 };
 
 /**
@@ -148,7 +143,6 @@ export const pleaseCompileRegisteredTemplate = async (
     });
     const compiledTemplate = hbs.compile(fileContents);
     const html = compiledTemplate(context);
-    console.log(html, context);
     return html;
 };
 
@@ -161,7 +155,23 @@ export const pleaseCompileTemplate = (template: string, context: any) => {
     return hbs.compile(template)(context);
 };
 
-export const sentEmailsLogger = createLogger({
+export const emailSuccessLogger = createLogger({
+    format: format.combine(
+        format.label({ label: "Emails" }),
+        timestamp(),
+        prettyPrint()
+    ),
+    transports: [
+        new transports.File({
+            filename: `logs/success_emails_${formatDate(
+                new Date(),
+                "yyyy-MM-dd"
+            )}.log`
+        }),
+    ],
+});
+
+export const emailErrorLogger = createLogger({
     format: format.combine(
         format.label({ label: "Emails" }),
         timestamp(),
@@ -172,7 +182,7 @@ export const sentEmailsLogger = createLogger({
             handleExceptions: true,
         }),
         new transports.File({
-            filename: `logs/sent_emails_${formatDate(
+            filename: `logs/error_emails_${formatDate(
                 new Date(),
                 "yyyy-MM-dd"
             )}.log`,
@@ -180,3 +190,15 @@ export const sentEmailsLogger = createLogger({
         }),
     ],
 });
+
+/**
+ * convert simple number to string with ordinal like 1st, 2nd, 24th
+ *
+ * @param n
+ */
+export const withOrdinal = (n: number) => {
+    const ordinal =
+        ["st", "nd", "rd"][(((((n < 0 ? -n : n) + 90) % 100) - 10) % 10) - 1] ||
+        "th";
+    return `${n}${ordinal}`;
+};

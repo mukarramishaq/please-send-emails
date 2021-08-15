@@ -3,10 +3,6 @@ export interface UserCsvRow {
     email: string;
     birth_date: string;
     joining_date: string;
-    birhtday_template_name: string;
-    anniversary_template_name: string;
-    birthday_email_sent_on: string;
-    anniversary_email_sent_on: string;
 }
 
 export interface UserProcessedRow {
@@ -14,8 +10,6 @@ export interface UserProcessedRow {
     email: string;
     birth_date: string;
     joining_date: string;
-    birhtday_template_name: string;
-    anniversary_template_name: string;
     birthday_email_sent_on: string;
     anniversary_email_sent_on: string;
 }

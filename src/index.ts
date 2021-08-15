@@ -2,24 +2,47 @@ import * as fs from "fs";
 import * as path from "path";
 import * as csv from "fast-csv";
 import { UserCsvRow, UserProcessedRow } from "./types";
-import { pleaseSendEmailsIfPending, sentEmailsLogger } from "./fns";
+import {
+    pleaseSendEmailsIfPending,
+    emailSuccessLogger,
+    emailErrorLogger,
+} from "./fns";
+
+const counts = {
+    total: 0,
+    sent: 0,
+    error: 0,
+};
 
 fs.createReadStream(path.resolve(__dirname, "assets", "csvs", "users.csv"))
     .pipe(csv.parse({ headers: true }))
     // pipe the parsed input into a csv formatter
     .pipe(
-        csv.format<UserCsvRow, UserProcessedRow>({ headers: true })
+        csv.format<UserCsvRow, UserCsvRow>({ headers: true })
     )
     // Using the transform function from the formatting stream
     .transform((row, next): void => {
-        pleaseSendEmailsIfPending(row).then(async (sentEmails) => {
-            sentEmails.map((sentOne) => {
-                sentEmailsLogger.log(
-                    "info",
-                    `${sentOne.template.id} to ${row.email}`,
-                    sentOne.sentMsg
-                );
+        counts.total += 1;
+        console.log("Total processed rows: ", counts.total);
+        pleaseSendEmailsIfPending(row)
+            .then(async (sentEmails) => {
+                sentEmails.map((sentOne) => {
+                    emailSuccessLogger.log(
+                        "info",
+                        `${sentOne.template.id} to ${row.email}`,
+                        sentOne.sentMsg
+                    );
+                    counts.sent += 1;
+                });
+                console.log("Total emails sent: ", counts.sent);
+            })
+            .catch((e) => {
+                counts.error += 1;
+                console.log("Total emails error: ", counts.error);
+                emailErrorLogger.log("error", e.getMessage(), e);
             });
-        });
+        next();
     })
-    .on("end", () => process.exit());
+    .on("end", () => {
+        process.exit();
+    });
