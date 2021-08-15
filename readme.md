@@ -52,15 +52,18 @@ Update email templates in `src/assets/email-templates/` folder. Currently two te
 
 These are `Handlebar` templates. All the variables are in `handlebars` format. Update the content as you like. But if the updated template has new variables then you need to update its context object:
 
-1. Update the template context object (i.e an object that contains all variables data which are being used in the template) in function [pleaseGetTemplateContext](https://github.com/mukarramishaq/please-send-emails/blob/53fd64d67f306328e2ba0c9cbf67be9f2eb1c940/src/fns.ts#L92) and populate the context object with new variables under specific event type only.
+1. Update the template context object (i.e an object that contains all variables data which are being used in the template) in  file `src/context.ts` under object [contextHandlers](https://github.com/mukarramishaq/please-send-emails/blob/cb660ea5c3d9f4cea097d943bd1f8c57de298ccc/src/context.ts#L9). In, this `contextHandlers` object, key is value from enum [EVENT_TYPES](https://github.com/mukarramishaq/please-send-emails/blob/cb660ea5c3d9f4cea097d943bd1f8c57de298ccc/src/types.ts#L30) and value is a function. Whatever this function will return will be used as context for the email template of that specific event.
 
 ### How to add new email templates
 
 Following are the steps:
-1. add HTML template to `src/assets/email-templates/` folder under some unique name
-2. register the event of this template in `src/types.ts` under [EVENT_TYPES](https://github.com/mukarramishaq/please-send-emails/blob/53fd64d67f306328e2ba0c9cbf67be9f2eb1c940/src/types.ts#L36) enum
-3. register this email template in [src/emailTemplatesRegister.ts](https://github.com/mukarramishaq/please-send-emails/blob/main/src/emailTemplatesRegister.ts) by adding a new object of `TemplateRegistry`.
-4. Update the template context object (i.e an object that contains all variables data which are being used in the template) in function [pleaseGetTemplateContext](https://github.com/mukarramishaq/please-send-emails/blob/53fd64d67f306328e2ba0c9cbf67be9f2eb1c940/src/fns.ts#L92) by adding a new if clause of your specific event type and populate the context object with new variables.
+1. Add HTML template to `src/assets/email-templates/` folder under some unique name
+
+2. Register the event of this template in `src/types.ts` under [EVENT_TYPES](https://github.com/mukarramishaq/please-send-emails/blob/53fd64d67f306328e2ba0c9cbf67be9f2eb1c940/src/types.ts#L36) enum
+
+3. Register this email template in [src/emailTemplatesRegister.ts](https://github.com/mukarramishaq/please-send-emails/blob/main/src/emailTemplatesRegister.ts) by adding a new object of `TemplateRegistry`.
+
+4. Register the context creator function of this template in  file `src/context.ts` under object [contextHandlers](https://github.com/mukarramishaq/please-send-emails/blob/cb660ea5c3d9f4cea097d943bd1f8c57de298ccc/src/context.ts#L9). In, this `contextHandlers` object, key is value from enum [EVENT_TYPES](https://github.com/mukarramishaq/please-send-emails/blob/cb660ea5c3d9f4cea097d943bd1f8c57de298ccc/src/types.ts#L30) and value is a function. Whatever this function will return will be used as context for the email template of that specific event.
 
 ### Setup for SMTP Configurations
 
