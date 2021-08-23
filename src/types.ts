@@ -17,11 +17,13 @@ export interface UserProcessedRow {
 export type TemplateRegistry = {
     id: EVENT_TYPES; // must be unique and must match with template name without extension
     subject: string;
-    attachments?: {
-        filename: string;
-        path: string; // absolute path
-        cid: string; // unique key to this attachment and it can serve as url in case you want to emebed a picture in body
-    }[];
+    attachments?: Attachment[];
+};
+
+export type Attachment = {
+    filename: string;
+    path: string; // absolute path
+    cid: string; // unique key to this attachment and it can serve as url in case you want to emebed a picture in body
 };
 
 export enum EVENT_TYPES {
@@ -32,3 +34,5 @@ export enum EVENT_TYPES {
 }
 
 export const ALLOWED_ANNIVERSARIES = [1, 5, 10, 15, 20];
+
+export const SEND_GIFT_SELECTION_EMAIL_BEFORE = 20; // in days

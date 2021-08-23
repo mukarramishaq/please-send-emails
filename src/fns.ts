@@ -3,6 +3,7 @@ import SMTPTransport from "nodemailer/lib/smtp-transport";
 import {
     ALLOWED_ANNIVERSARIES,
     EVENT_TYPES,
+    SEND_GIFT_SELECTION_EMAIL_BEFORE,
     TemplateRegistry,
     UserCsvRow,
 } from "./types";
@@ -87,7 +88,7 @@ export const shallISendForBirthday = (user: UserCsvRow) => {
  */
 export const shallISendForBirthdayGiftSelection = (user: UserCsvRow) => {
     const date = new Date(user.birth_date);
-    const dueDate = subDays(date, 20); // 20 days before
+    const dueDate = subDays(date, SEND_GIFT_SELECTION_EMAIL_BEFORE); // before how many days
     const today = new Date();
     return (
         getMonth(today) === getMonth(dueDate) &&
@@ -121,7 +122,7 @@ export const shallISendForAnniversary = (user: UserCsvRow) => {
  */
 export const shallISendForAnniversaryGiftSelection = (user: UserCsvRow) => {
     const date = new Date(user.joining_date);
-    const dueDate = subDays(date, 20); // 20 days before
+    const dueDate = subDays(date, SEND_GIFT_SELECTION_EMAIL_BEFORE); // before how many days
     const today = new Date();
     const isToday =
         getMonth(today) === getMonth(dueDate) &&
