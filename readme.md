@@ -10,6 +10,19 @@ Make sure you have the following items setup on your system:
 2. npm or yarn
 3. Email account, of course!
 
+## Events/Templates
+
+Currently following events and their templates are supported:
+
+1. event: `EVENT_TYPES.BIRTHDAY`, template: `happy-birthday.html`
+2. event: `EVENT_TYPES.ANNIVERSARY`, template: `happy-anniversary.html`
+3. event: `EVENT_TYPES.GIFT_SELECTION_BIRTHDAY`, template: `gift-selection-birthday.html`
+
+   1. by default, this email is sent 20 days before the birthday
+4. event: `EVENT_TYPES.GIFT_SELECTION_ANNIVERSARY`, template: `gift-selection-anniversary.html`
+
+   1. by default, this email is sent 20 days before the anniversary date
+
 ## How to Setup?
 
 1. Take a clone of this repository:
@@ -45,10 +58,7 @@ Update Users in `src/assets/csvs/users.csv`
 
 ### How to update email templates or Events
 
-Update email templates in `src/assets/email-templates/` folder. Currently two templates are supported:
-
-1. `happy-birthday.html`
-2. `happy-anniversary.html`
+Update email templates in `src/assets/email-templates/` folder.
 
 These are `Handlebar` templates. All the variables are in `handlebars` format. Update the content as you like. But if the updated template has new variables then you need to update its context object:
 
@@ -61,7 +71,11 @@ Following are the steps:
 
 2. Register the event of this template in `src/types.ts` under [EVENT_TYPES](https://github.com/mukarramishaq/please-send-emails/blob/53fd64d67f306328e2ba0c9cbf67be9f2eb1c940/src/types.ts#L36) enum
 
-3. Register this email template in [src/emailTemplatesRegister.ts](https://github.com/mukarramishaq/please-send-emails/blob/main/src/emailTemplatesRegister.ts) by adding a new object of `TemplateRegistry`.
+3. Register this email template in [src/emailTemplatesRegister.ts](https://github.com/mukarramishaq/please-send-emails/blob/main/src/emailTemplatesRegister.ts) by adding a new object of `TemplateRegistry`. 
+
+**Note**: attachments in `TemplateRegistery` is an array of [Attachment](https://github.com/mukarramishaq/please-send-emails/blob/105bc4e93d4fe7a45af23633c28231f2ce838d3c/src/types.ts#L23) objects. And `filename` and `path` attributes of `Attachment` can use context data. So, we can dynamically decide what attachment to send with email.
+
+**Note**: Every element which can use context data must use `Handlebars` notation to access the context attributes. e.g. "Happy {{whatTh}} Anniversary". Here `whatTh` will be an attribute of context object
 
 4. Register the context creator function of this template in  file `src/context.ts` under object [contextHandlers](https://github.com/mukarramishaq/please-send-emails/blob/cb660ea5c3d9f4cea097d943bd1f8c57de298ccc/src/context.ts#L9). In, this `contextHandlers` object, key is value from enum [EVENT_TYPES](https://github.com/mukarramishaq/please-send-emails/blob/cb660ea5c3d9f4cea097d943bd1f8c57de298ccc/src/types.ts#L30) and value is a function. Whatever this function will return will be used as context for the email template of that specific event.
 
