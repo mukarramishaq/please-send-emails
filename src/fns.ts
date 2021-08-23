@@ -1,6 +1,11 @@
 import { createTransport } from "nodemailer";
 import SMTPTransport from "nodemailer/lib/smtp-transport";
-import { EVENT_TYPES, TemplateRegistry, UserCsvRow } from "./types";
+import {
+    ALLOWED_ANNIVERSARIES,
+    EVENT_TYPES,
+    TemplateRegistry,
+    UserCsvRow,
+} from "./types";
 import * as hbs from "handlebars";
 import * as fs from "fs";
 import * as path from "path";
@@ -10,6 +15,7 @@ import {
     getDate,
     format as formatDate,
     differenceInYears,
+    subDays,
 } from "date-fns";
 import { REGISTERED_EMAIL_TEMPLATES } from "./emailTemplatesRegister";
 import { createLogger, format, transports } from "winston";
@@ -36,23 +42,26 @@ export const pleaseSendEmailsIfPending = async (user: UserCsvRow) => {
  * @param user
  */
 export const whatEmailsArePending = (user: UserCsvRow) => {
-    const birthDate = new Date(user.birth_date);
-    const anniversaryDate = new Date(user.joining_date);
-    const pendingEmails: TemplateRegistry[] = [];
-    if (shallISendForBirthday(birthDate)) {
-        pendingEmails.push(
-            REGISTERED_EMAIL_TEMPLATES.filter(
-                (t) => t.id === EVENT_TYPES.BIRTHDAY
-            ).pop()
-        );
-    }
-    if (shallISendForAnniversary(anniversaryDate)) {
-        pendingEmails.push(
-            REGISTERED_EMAIL_TEMPLATES.filter(
-                (t) => t.id === EVENT_TYPES.ANNIVERSARY
-            ).pop()
-        );
-    }
+    /**
+     * all the functions in shallIs array are there
+     * to determine whether an email is pending
+     * for a specific event for this user
+     */
+    const shallIs = [
+        shallISendForAnniversary,
+        shallISendForAnniversaryGiftSelection,
+        shallISendForBirthday,
+        shallISendForBirthdayGiftSelection,
+    ];
+    const pendingEmails = shallIs.reduce((pendings, shallI) => {
+        const event = shallI(user);
+        if (event) {
+            pendings.push(
+                REGISTERED_EMAIL_TEMPLATES.filter((t) => t.id === event).pop()
+            );
+        }
+        return pendings;
+    }, [] as TemplateRegistry[]);
     return pendingEmails;
 };
 
@@ -61,10 +70,29 @@ export const whatEmailsArePending = (user: UserCsvRow) => {
  * are we really need to send an email for this one or not
  * @param date
  */
-export const shallISendForBirthday = (date: Date) => {
+export const shallISendForBirthday = (user: UserCsvRow) => {
+    const date = new Date(user.birth_date);
     const today = new Date();
     return (
-        getMonth(today) === getMonth(date) && getDate(today) === getDate(date)
+        getMonth(today) === getMonth(date) &&
+        getDate(today) === getDate(date) &&
+        EVENT_TYPES.BIRTHDAY
+    );
+};
+
+/**
+ * this function tells whether a birthday is today AND
+ * are we really need to send an email for this one or not
+ * @param date
+ */
+export const shallISendForBirthdayGiftSelection = (user: UserCsvRow) => {
+    const date = new Date(user.birth_date);
+    const dueDate = subDays(date, 20); // 20 days before
+    const today = new Date();
+    return (
+        getMonth(today) === getMonth(dueDate) &&
+        getDate(today) === getDate(dueDate) &&
+        EVENT_TYPES.GIFT_SELECTION_BIRTHDAY
     );
 };
 
@@ -73,13 +101,37 @@ export const shallISendForBirthday = (date: Date) => {
  * are we really need to send an email for this one or not
  * @param date
  */
-export const shallISendForAnniversary = (date: Date) => {
+export const shallISendForAnniversary = (user: UserCsvRow) => {
+    const date = new Date(user.joining_date);
     const today = new Date();
-    const allowedCelebratedAnniversaris = [1, 3, 5, 8, 10, 12, 15, 18, 20];
     const isToday =
         getMonth(today) === getMonth(date) && getDate(today) === getDate(date);
     const numberOfYears = differenceInYears(today, date);
-    return isToday && allowedCelebratedAnniversaris.includes(numberOfYears);
+    return (
+        isToday &&
+        ALLOWED_ANNIVERSARIES.includes(numberOfYears) &&
+        EVENT_TYPES.ANNIVERSARY
+    );
+};
+
+/**
+ * this function tells whether an anniversary gift selection email
+ * is today AND are we really need to send an email for this one or not
+ * @param date
+ */
+export const shallISendForAnniversaryGiftSelection = (user: UserCsvRow) => {
+    const date = new Date(user.joining_date);
+    const dueDate = subDays(date, 20); // 20 days before
+    const today = new Date();
+    const isToday =
+        getMonth(today) === getMonth(dueDate) &&
+        getDate(today) === getDate(dueDate);
+    const numberOfYears = differenceInYears(today, dueDate);
+    return (
+        isToday &&
+        ALLOWED_ANNIVERSARIES.includes(numberOfYears) &&
+        EVENT_TYPES.GIFT_SELECTION_ANNIVERSARY
+    );
 };
 
 /**
@@ -100,7 +152,13 @@ export const pleaseSendEmail = async (
         to: `${user.name} <${user.email}>`,
         subject,
         html: htmlBody,
-        attachments: template.attachments,
+        attachments: template.attachments.map((attachment) => {
+            return {
+                ...attachment,
+                filename: pleaseCompileTemplate(attachment.filename, context),
+                path: pleaseCompileTemplate(attachment.path, context),
+            };
+        }),
     });
 };
 
@@ -166,7 +224,7 @@ export const emailSuccessLogger = createLogger({
             filename: `logs/success_emails_${formatDate(
                 new Date(),
                 "yyyy-MM-dd"
-            )}.log`
+            )}.log`,
         }),
     ],
 });

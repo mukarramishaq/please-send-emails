@@ -32,14 +32,14 @@ fs.createReadStream(path.resolve(__dirname, "assets", "csvs", "users.csv"))
                         `${sentOne.template.id} to ${row.email}`,
                         sentOne.sentMsg
                     );
-                    counts.sent += 1;
                 });
+                counts.sent += sentEmails.length;
                 console.log("Total emails sent: ", counts.sent);
             })
             .catch((e) => {
                 counts.error += 1;
-                console.log("Total emails error: ", counts.error);
-                emailErrorLogger.log("error", e.getMessage(), e);
+                console.log("Total rows error: ", counts.error);
+                emailErrorLogger.log("error", e.message, e);
             });
         next();
     })

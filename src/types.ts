@@ -14,7 +14,6 @@ export interface UserProcessedRow {
     anniversary_email_sent_on: string;
 }
 
-
 export type TemplateRegistry = {
     id: EVENT_TYPES; // must be unique and must match with template name without extension
     subject: string;
@@ -22,12 +21,14 @@ export type TemplateRegistry = {
         filename: string;
         path: string; // absolute path
         cid: string; // unique key to this attachment and it can serve as url in case you want to emebed a picture in body
-    }[]
+    }[];
 };
-
-
 
 export enum EVENT_TYPES {
     BIRTHDAY = "happy-birthday",
-    ANNIVERSARY = "happy-anniversary"
+    ANNIVERSARY = "happy-anniversary",
+    GIFT_SELECTION_BIRTHDAY = "gift-selection-birthday",
+    GIFT_SELECTION_ANNIVERSARY = "gift-selection-anniversary",
 }
+
+export const ALLOWED_ANNIVERSARIES = [1, 5, 10, 15, 20];

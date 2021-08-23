@@ -20,15 +20,33 @@ export const contextHandlers = {
         user: UserCsvRow
     ) => {
         const attachments = [...template.attachments];
-        const imageUrl = "cid:" + (attachments.pop()?.cid || "");
+        const attachment = attachments.pop();
+        const imageUrl = "cid:" + (attachment?.cid || "");
         const joiningDate = new Date(user.joining_date);
         const numberOfYears = differenceInYears(new Date(), joiningDate);
         const numberOfYearsWithOrdinal = withOrdinal(numberOfYears);
         return {
             userName: user.name,
+            filename: `${numberOfYears}.png`,
             imageUrl,
             numberOfYears,
             numberOfYearsWithOrdinal,
+        };
+    },
+    [EVENT_TYPES.GIFT_SELECTION_BIRTHDAY]: (
+        template: TemplateRegistry,
+        user: UserCsvRow
+    ) => {
+        return {
+            userName: user.name,
+        };
+    },
+    [EVENT_TYPES.GIFT_SELECTION_ANNIVERSARY]: (
+        template: TemplateRegistry,
+        user: UserCsvRow
+    ) => {
+        return {
+            userName: user.name,
         };
     },
 };

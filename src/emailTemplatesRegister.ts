@@ -26,15 +26,26 @@ export const REGISTERED_EMAIL_TEMPLATES: TemplateRegistry[] = [
         subject: "Happy Anniversary {{userName}}",
         attachments: [
             {
-                filename: "happy-anniversary.png",
+                filename: "{{filename}}",
                 path: path.resolve(
                     __dirname,
                     "assets",
                     "images",
-                    "happy-anniversary.png"
+                    "anniversary",
+                    "{{filename}}"
                 ),
                 cid: "happy.anniversary.unique.mk", // any unique string and it will serve as url to embed the picture in the email
             },
         ],
+    },
+    {
+        id: EVENT_TYPES.GIFT_SELECTION_BIRTHDAY, // template name without extension
+        subject: "Gift Selection for Birthday",
+        attachments: [],
+    },
+    {
+        id: EVENT_TYPES.GIFT_SELECTION_ANNIVERSARY, // template name without extension
+        subject: "Gift Selection for Anniversary",
+        attachments: [],
     },
 ];
