@@ -1,7 +1,7 @@
 import { createTransport } from "nodemailer";
 import SMTPTransport from "nodemailer/lib/smtp-transport";
 import {
-    ALLOWED_ANNIVERSARIES,
+    ALLOWED_GIFTED_ANNIVERSARIES,
     EVENT_TYPES,
     SEND_GIFT_SELECTION_EMAIL_BEFORE,
     TemplateRegistry,
@@ -107,12 +107,7 @@ export const shallISendForAnniversary = (user: UserCsvRow) => {
     const today = new Date();
     const isToday =
         getMonth(today) === getMonth(date) && getDate(today) === getDate(date);
-    const numberOfYears = differenceInYears(today, date);
-    return (
-        isToday &&
-        ALLOWED_ANNIVERSARIES.includes(numberOfYears) &&
-        EVENT_TYPES.ANNIVERSARY
-    );
+    return isToday && EVENT_TYPES.ANNIVERSARY;
 };
 
 /**
@@ -130,7 +125,7 @@ export const shallISendForAnniversaryGiftSelection = (user: UserCsvRow) => {
     const numberOfYears = differenceInYears(today, dueDate);
     return (
         isToday &&
-        ALLOWED_ANNIVERSARIES.includes(numberOfYears) &&
+        ALLOWED_GIFTED_ANNIVERSARIES.includes(numberOfYears) &&
         EVENT_TYPES.GIFT_SELECTION_ANNIVERSARY
     );
 };
@@ -148,18 +143,19 @@ export const pleaseSendEmail = async (
     const context = pleaseGetContext(template, user);
     const subject = pleaseCompileTemplate(template.subject, context);
     const htmlBody = await pleaseCompileRegisteredTemplate(template, context);
+    const attmnts = template.attachments.map((attachment) => {
+        return {
+            ...attachment,
+            filename: pleaseCompileTemplate(attachment.filename, context),
+            path: pleaseCompileTemplate(attachment.path, context),
+        };
+    });
     return tranporter.sendMail({
         ...EMAIL_USERS,
         to: `${user.name} <${user.email}>`,
         subject,
         html: htmlBody,
-        attachments: template.attachments.map((attachment) => {
-            return {
-                ...attachment,
-                filename: pleaseCompileTemplate(attachment.filename, context),
-                path: pleaseCompileTemplate(attachment.path, context),
-            };
-        }),
+        attachments: attmnts,
     });
 };
 

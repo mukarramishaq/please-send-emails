@@ -1,4 +1,9 @@
-import { EVENT_TYPES, TemplateRegistry, UserCsvRow } from "./types";
+import {
+    EVENT_TYPES,
+    NUMBER_OF_BIRTHDAY_CARDS,
+    TemplateRegistry,
+    UserCsvRow,
+} from "./types";
 import { differenceInYears } from "date-fns";
 import { withOrdinal } from "./fns";
 
@@ -8,45 +13,70 @@ import { withOrdinal } from "./fns";
  */
 export const contextHandlers = {
     [EVENT_TYPES.BIRTHDAY]: (template: TemplateRegistry, user: UserCsvRow) => {
-        const attachments = [...template.attachments];
-        const imageUrl = "cid:" + (attachments.pop()?.cid || "");
+        const attachmentUrls = template.attachments.reduce(
+            (result, attachment) => {
+                return {
+                    ...result,
+                    [attachment.cid]: "cid:" + (attachment.cid || ""),
+                };
+            },
+            {} as { [key: string]: string }
+        );
         return {
             userName: user.name,
-            imageUrl,
+            filename: `${
+                (Math.floor(Math.random() * 1000) % NUMBER_OF_BIRTHDAY_CARDS) +
+                1
+            }.png`,
+            ...attachmentUrls,
         };
     },
     [EVENT_TYPES.ANNIVERSARY]: (
         template: TemplateRegistry,
         user: UserCsvRow
     ) => {
-        const attachments = [...template.attachments];
-        const attachment = attachments.pop();
-        const imageUrl = "cid:" + (attachment?.cid || "");
+        const attachmentUrls = template.attachments.map((attachment) => {
+            return {
+                [attachment.cid]: "cid:" + (attachment.cid || ""),
+            };
+        });
         const joiningDate = new Date(user.joining_date);
         const numberOfYears = differenceInYears(new Date(), joiningDate);
         const numberOfYearsWithOrdinal = withOrdinal(numberOfYears);
         return {
             userName: user.name,
             filename: `${numberOfYears}.png`,
-            imageUrl,
             numberOfYears,
             numberOfYearsWithOrdinal,
+            ...attachmentUrls,
         };
     },
     [EVENT_TYPES.GIFT_SELECTION_BIRTHDAY]: (
         template: TemplateRegistry,
         user: UserCsvRow
     ) => {
+        const attachmentUrls = template.attachments.map((attachment) => {
+            return {
+                [attachment.cid]: "cid:" + (attachment.cid || ""),
+            };
+        });
         return {
             userName: user.name,
+            ...attachmentUrls,
         };
     },
     [EVENT_TYPES.GIFT_SELECTION_ANNIVERSARY]: (
         template: TemplateRegistry,
         user: UserCsvRow
     ) => {
+        const attachmentUrls = template.attachments.map((attachment) => {
+            return {
+                [attachment.cid]: "cid:" + (attachment.cid || ""),
+            };
+        });
         return {
             userName: user.name,
+            ...attachmentUrls,
         };
     },
 };

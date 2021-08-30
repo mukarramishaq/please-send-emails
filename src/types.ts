@@ -33,6 +33,8 @@ export enum EVENT_TYPES {
     GIFT_SELECTION_ANNIVERSARY = "gift-selection-anniversary",
 }
 
-export const ALLOWED_ANNIVERSARIES = [1, 5, 10, 15, 20];
+export const ALLOWED_GIFTED_ANNIVERSARIES = [1, 5, 10, 15, 20];
 
 export const SEND_GIFT_SELECTION_EMAIL_BEFORE = 20; // in days
+
+export const NUMBER_OF_BIRTHDAY_CARDS = 17;
