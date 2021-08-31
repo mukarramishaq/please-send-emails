@@ -18,6 +18,9 @@ import {
     format as formatDate,
     differenceInYears,
     subDays,
+    isToday,
+    setYear,
+    getYear,
 } from "date-fns";
 import { REGISTERED_EMAIL_TEMPLATES } from "./emailTemplatesRegister";
 import { createLogger, format, transports } from "winston";
@@ -77,11 +80,7 @@ export const whatEmailsArePending = (user: UserCsvRow) => {
 export const shallISendForBirthday = (user: UserCsvRow) => {
     const date = new Date(user.birth_date);
     const today = new Date();
-    return (
-        getMonth(today) === getMonth(date) &&
-        getDate(today) === getDate(date) &&
-        EVENT_TYPES.BIRTHDAY
-    );
+    return isToday(setYear(date, getYear(today))) && EVENT_TYPES.BIRTHDAY;
 };
 
 /**
@@ -94,8 +93,7 @@ export const shallISendForBirthdayGiftSelection = (user: UserCsvRow) => {
     const dueDate = subDays(date, SEND_GIFT_SELECTION_EMAIL_BEFORE); // before how many days
     const today = new Date();
     return (
-        getMonth(today) === getMonth(dueDate) &&
-        getDate(today) === getDate(dueDate) &&
+        isToday(setYear(dueDate, getYear(today))) &&
         EVENT_TYPES.GIFT_SELECTION_BIRTHDAY
     );
 };
@@ -108,9 +106,8 @@ export const shallISendForBirthdayGiftSelection = (user: UserCsvRow) => {
 export const shallISendForAnniversary = (user: UserCsvRow) => {
     const date = new Date(user.joining_date);
     const today = new Date();
-    const isToday =
-        getMonth(today) === getMonth(date) && getDate(today) === getDate(date);
-    return isToday && EVENT_TYPES.ANNIVERSARY;
+    const isDue = isToday(setYear(date, getYear(today)));
+    return isDue && EVENT_TYPES.ANNIVERSARY;
 };
 
 /**
@@ -122,13 +119,10 @@ export const shallISendForAnniversaryGiftSelection = (user: UserCsvRow) => {
     const date = new Date(user.joining_date);
     const dueDate = subDays(date, SEND_GIFT_SELECTION_EMAIL_BEFORE); // before how many days
     const today = new Date();
-    const isToday =
-        getMonth(today) === getMonth(dueDate) &&
-        getDate(today) === getDate(dueDate);
+    const isDue = isToday(setYear(dueDate, getYear(date)));
     const numberOfYears = differenceInYears(today, dueDate);
-    console.log("MKDEBUG: ", user.joining_date, numberOfYears, isToday);
     return (
-        isToday &&
+        isDue &&
         ALLOWED_GIFTED_ANNIVERSARIES.includes(numberOfYears) &&
         EVENT_TYPES.GIFT_SELECTION_ANNIVERSARY
     );

@@ -6,6 +6,7 @@ import {
 } from "./types";
 import { differenceInYears } from "date-fns";
 import { withOrdinal } from "./fns";
+import { GIFT_SELECTION_FORM_LINK } from "./env";
 
 /**
  * Register your context handlers
@@ -70,6 +71,7 @@ export const contextHandlers = {
         );
         return {
             userName: user.name,
+            gift_selection_form_link: GIFT_SELECTION_FORM_LINK,
             ...attachmentUrls,
         };
     },
@@ -88,6 +90,7 @@ export const contextHandlers = {
         );
         return {
             userName: user.name,
+            gift_selection_form_link: GIFT_SELECTION_FORM_LINK,
             ...attachmentUrls,
         };
     },

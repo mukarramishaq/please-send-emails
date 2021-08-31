@@ -11,8 +11,8 @@ export const EMAIL_USERS = {
     bcc: process.env.EMAIL_BCC,
 };
 
-export const GOOGLE_BUCKET_NAME = process.env.GOOGLE_BUCKET_NAME
-
+export const GOOGLE_BUCKET_NAME = process.env.GOOGLE_BUCKET_NAME;
+export const GIFT_SELECTION_FORM_LINK = process.env.GIFT_SELECTION_FORM_LINK;
 /**
  * SMTP Credentials
  */
