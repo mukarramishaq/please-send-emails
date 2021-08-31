@@ -1,4 +1,3 @@
-import * as path from "path";
 import { EVENT_TYPES, TemplateRegistry } from "./types";
 
 /**
@@ -11,18 +10,12 @@ export const REGISTERED_EMAIL_TEMPLATES: TemplateRegistry[] = [
         attachments: [
             {
                 filename: "{{filename}}",
-                path: path.resolve(
-                    __dirname,
-                    "assets",
-                    "images",
-                    "birthday",
-                    "{{filename}}"
-                ),
+                path: "images/birthday/{{filename}}",
                 cid: "happy_birthday", // any unique string and it will serve as url to embed the picture in the email
             },
             {
                 filename: "logo.png",
-                path: path.resolve(__dirname, "assets", "images", "logo.png"),
+                path: "images/logo.png",
                 cid: "logo_ec",
             },
         ],
@@ -33,18 +26,12 @@ export const REGISTERED_EMAIL_TEMPLATES: TemplateRegistry[] = [
         attachments: [
             {
                 filename: "{{filename}}",
-                path: path.resolve(
-                    __dirname,
-                    "assets",
-                    "images",
-                    "anniversary",
-                    "{{filename}}"
-                ),
+                path: "images/anniversary/{{filename}}",
                 cid: "happy_anniversary", // any unique string and it will serve as url to embed the picture in the email
             },
             {
                 filename: "logo.png",
-                path: path.resolve(__dirname, "assets", "images", "logo.png"),
+                path: "images/logo.png",
                 cid: "logo_ec",
             },
         ],
@@ -55,7 +42,7 @@ export const REGISTERED_EMAIL_TEMPLATES: TemplateRegistry[] = [
         attachments: [
             {
                 filename: "logo.png",
-                path: path.resolve(__dirname, "assets", "images", "logo.png"),
+                path: "images/logo.png",
                 cid: "logo_ec",
             },
         ],
@@ -66,7 +53,7 @@ export const REGISTERED_EMAIL_TEMPLATES: TemplateRegistry[] = [
         attachments: [
             {
                 filename: "logo.png",
-                path: path.resolve(__dirname, "assets", "images", "logo.png"),
+                path: "images/logo.png",
                 cid: "logo_ec",
             },
         ],

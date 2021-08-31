@@ -1,11 +1,10 @@
-import * as fs from "fs";
-import * as path from "path";
 import * as csv from "fast-csv";
-import { UserCsvRow, UserProcessedRow } from "./types";
+import { UserCsvRow } from "./types";
 import {
     pleaseSendEmailsIfPending,
     emailSuccessLogger,
     emailErrorLogger,
+    getReadableStreamOfFile,
 } from "./fns";
 
 const counts = {
@@ -14,7 +13,7 @@ const counts = {
     error: 0,
 };
 
-fs.createReadStream(path.resolve(__dirname, "assets", "csvs", "users.csv"))
+getReadableStreamOfFile("csvs/users.csv")
     .pipe(csv.parse({ headers: true }))
     // pipe the parsed input into a csv formatter
     .pipe(

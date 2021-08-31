@@ -11,6 +11,8 @@ export const EMAIL_USERS = {
     bcc: process.env.EMAIL_BCC,
 };
 
+export const GOOGLE_BUCKET_NAME = process.env.GOOGLE_BUCKET_NAME
+
 /**
  * SMTP Credentials
  */

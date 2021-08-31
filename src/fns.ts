@@ -2,6 +2,7 @@ import { createTransport } from "nodemailer";
 import SMTPTransport from "nodemailer/lib/smtp-transport";
 import {
     ALLOWED_GIFTED_ANNIVERSARIES,
+    Attachment,
     EVENT_TYPES,
     SEND_GIFT_SELECTION_EMAIL_BEFORE,
     TemplateRegistry,
@@ -10,17 +11,20 @@ import {
 import * as hbs from "handlebars";
 import * as fs from "fs";
 import * as path from "path";
-import { SMTP_CREDENTIALS, EMAIL_USERS } from "./env";
+import { SMTP_CREDENTIALS, EMAIL_USERS, GOOGLE_BUCKET_NAME } from "./env";
 import {
     getMonth,
     getDate,
     format as formatDate,
     differenceInYears,
     subDays,
+    addDays,
 } from "date-fns";
 import { REGISTERED_EMAIL_TEMPLATES } from "./emailTemplatesRegister";
 import { createLogger, format, transports } from "winston";
 import { pleaseGetContext } from "./context";
+import { Storage } from "@google-cloud/storage";
+import { Readable } from "nodemailer/lib/xoauth2";
 
 const { timestamp, prettyPrint } = format;
 
@@ -130,6 +134,24 @@ export const shallISendForAnniversaryGiftSelection = (user: UserCsvRow) => {
     );
 };
 
+export const getStorageObject = () => {
+    return new Storage({
+        projectId: "ec-rolustech",
+        keyFilename: "./key.json",
+    });
+};
+
+export const getBucket = () => {
+    return getStorageObject().bucket(GOOGLE_BUCKET_NAME);
+};
+
+export const getReadableStreamOfFile = (filePath: string) => {
+    if (GOOGLE_BUCKET_NAME) {
+        return getBucket().file(filePath).createReadStream();
+    }
+    return fs.createReadStream(path.resolve(__dirname, "assets", filePath));
+};
+
 /**
  * this will send an email to user with the specified template
  * @param user
@@ -143,20 +165,58 @@ export const pleaseSendEmail = async (
     const context = pleaseGetContext(template, user);
     const subject = pleaseCompileTemplate(template.subject, context);
     const htmlBody = await pleaseCompileRegisteredTemplate(template, context);
-    const attmnts = template.attachments.map((attachment) => {
-        return {
-            ...attachment,
-            filename: pleaseCompileTemplate(attachment.filename, context),
-            path: pleaseCompileTemplate(attachment.path, context),
-        };
-    });
+    const attachments = await processAttachments(template.attachments, context);
     return tranporter.sendMail({
         ...EMAIL_USERS,
         to: `${user.name} <${user.email}>`,
         subject,
         html: htmlBody,
-        attachments: attmnts,
+        attachments,
     });
+};
+
+export const processAttachments = async (
+    attachments: Attachment[],
+    context: any
+) => {
+    return await Promise.all(
+        attachments.map(async (attachment) => {
+            const filename = pleaseCompileTemplate(
+                attachment.filename,
+                context
+            );
+            const processedPath = pleaseCompileTemplate(
+                attachment.path,
+                context
+            );
+            const formattedAttachment: Attachment & { content?: Readable } = {
+                ...attachment,
+                filename,
+                path: processedPath,
+            };
+            try {
+                if (GOOGLE_BUCKET_NAME) {
+                    const filePath = formattedAttachment.path;
+                    formattedAttachment.content = getReadableStreamOfFile(
+                        filePath
+                    );
+                    delete formattedAttachment.path;
+                } else {
+                    formattedAttachment.path = path.resolve(
+                        __dirname,
+                        "assets",
+                        formattedAttachment.path
+                    );
+                }
+            } catch (e) {
+                console.error(
+                    `Error occurred while processing attachments: `,
+                    e
+                );
+            }
+            return formattedAttachment;
+        })
+    );
 };
 
 /**
