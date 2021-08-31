@@ -18,7 +18,6 @@ import {
     format as formatDate,
     differenceInYears,
     subDays,
-    addDays,
 } from "date-fns";
 import { REGISTERED_EMAIL_TEMPLATES } from "./emailTemplatesRegister";
 import { createLogger, format, transports } from "winston";
@@ -127,6 +126,7 @@ export const shallISendForAnniversaryGiftSelection = (user: UserCsvRow) => {
         getMonth(today) === getMonth(dueDate) &&
         getDate(today) === getDate(dueDate);
     const numberOfYears = differenceInYears(today, dueDate);
+    console.log("MKDEBUG: ", user.joining_date, numberOfYears, isToday);
     return (
         isToday &&
         ALLOWED_GIFTED_ANNIVERSARIES.includes(numberOfYears) &&

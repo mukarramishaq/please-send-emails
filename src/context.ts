@@ -35,11 +35,15 @@ export const contextHandlers = {
         template: TemplateRegistry,
         user: UserCsvRow
     ) => {
-        const attachmentUrls = template.attachments.map((attachment) => {
-            return {
-                [attachment.cid]: "cid:" + (attachment.cid || ""),
-            };
-        });
+        const attachmentUrls = template.attachments.reduce(
+            (result, attachment) => {
+                return {
+                    ...result,
+                    [attachment.cid]: "cid:" + (attachment.cid || ""),
+                };
+            },
+            {} as { [key: string]: string }
+        );
         const joiningDate = new Date(user.joining_date);
         const numberOfYears = differenceInYears(new Date(), joiningDate);
         const numberOfYearsWithOrdinal = withOrdinal(numberOfYears);
@@ -55,11 +59,15 @@ export const contextHandlers = {
         template: TemplateRegistry,
         user: UserCsvRow
     ) => {
-        const attachmentUrls = template.attachments.map((attachment) => {
-            return {
-                [attachment.cid]: "cid:" + (attachment.cid || ""),
-            };
-        });
+        const attachmentUrls = template.attachments.reduce(
+            (result, attachment) => {
+                return {
+                    ...result,
+                    [attachment.cid]: "cid:" + (attachment.cid || ""),
+                };
+            },
+            {} as { [key: string]: string }
+        );
         return {
             userName: user.name,
             ...attachmentUrls,
@@ -69,11 +77,15 @@ export const contextHandlers = {
         template: TemplateRegistry,
         user: UserCsvRow
     ) => {
-        const attachmentUrls = template.attachments.map((attachment) => {
-            return {
-                [attachment.cid]: "cid:" + (attachment.cid || ""),
-            };
-        });
+        const attachmentUrls = template.attachments.reduce(
+            (result, attachment) => {
+                return {
+                    ...result,
+                    [attachment.cid]: "cid:" + (attachment.cid || ""),
+                };
+            },
+            {} as { [key: string]: string }
+        );
         return {
             userName: user.name,
             ...attachmentUrls,

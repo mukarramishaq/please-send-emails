@@ -22,7 +22,7 @@ export const REGISTERED_EMAIL_TEMPLATES: TemplateRegistry[] = [
     },
     {
         id: EVENT_TYPES.ANNIVERSARY, // template name without extension
-        subject: "Happy Anniversary {{userName}}",
+        subject: "Happy {{numberOfYearsWithOrdinal}} Anniversary {{userName}}",
         attachments: [
             {
                 filename: "{{filename}}",
@@ -49,7 +49,8 @@ export const REGISTERED_EMAIL_TEMPLATES: TemplateRegistry[] = [
     },
     {
         id: EVENT_TYPES.GIFT_SELECTION_ANNIVERSARY, // template name without extension
-        subject: "Gift Selection for Anniversary",
+        subject:
+            "Gift Selection for your {{numberOfYearsWithOrdinal}} Anniversary",
         attachments: [
             {
                 filename: "logo.png",

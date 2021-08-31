@@ -15,13 +15,20 @@
 
 <body style="margin: 0; padding: 0">
     <p>Hi {{userName}},</p>
+    <p>Please accept our good wishes on the {{numberOfYearsWithOrdinal}} work anniversary of your employment with
+        Rolustech. Your contribution to the company is greatly appreciated.<br />You are a valuable member of the team
+        and we hope that you will continue to serve Rolustech with the same zest in the years to come!
+    </p>
+    <p>Congratulations!</p>
+    {{log happy_anniversary}}
+    <img src="{{happy_anniversary}}" />
     <br />
-    <img src="{{imageUrl}}" />
-    <p>Happy {{numberOfYearsWithOrdinal}} Anniversary. Thankyou for staying {{numberOfYears}} in this company, goog luck!</p>
-    <br />
-    <br />
-    <p>Yours truly,</p>
-    <p>Mukarram Ishaq</p>
+    <p>--</p>
+    <p style="font-size: small;"><b style="color: rgba(118, 118, 118, 1);">Event Club</b> || <span
+            style="color: rgba(153, 153, 153, 1);">Engage. Organize. Entertain.</span></p>
+    <p style="font-size: small;"><b style="color: rgba(118, 118, 118, 1);">Email</b> || <a
+            href="mailto:eventclub@rolustech.com">eventclub@rolustech.com</a></p>
+    <img src="{{logo_ec}}" style="width: 194px; height: 194px;" />
 </body>
 
 </html>

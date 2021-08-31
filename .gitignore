@@ -6,3 +6,5 @@ logs
 *.log
 .env
 key.json
+src/assets/images
+src/assets/csvs
