@@ -53,6 +53,9 @@ export const readFileAndSendEmails = async (): Promise<COUNTS> => {
             .on("error", (e) => {
                 reject(e);
             })
+            .on("end", () => {
+                resolve(counts);
+            })
             .on("finish", () => {
                 resolve(counts);
             });

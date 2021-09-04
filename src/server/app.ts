@@ -6,17 +6,18 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 app.use((req: Request, res: Response, next: NextFunction) => {
-    if (!req.body?.please_send_emails) {
-        throw new Error("Wrong message");
+    const body = req.body;
+    if (!body.message?.attributes?.please_send_emails) {
+        throw new Error("Not a valid message");
     }
     next();
 }); // apply message validator of required vendor
 app.use(async (req: Request, res: Response, next: NextFunction) => {
-    const counts = await readFileAndSendEmails();
-    res.json({
-        title: "Emails are sent",
-        message: `total: ${counts.total}, sent: ${counts.sent}, error: ${counts.error}`,
+    const counts = await readFileAndSendEmails().catch((e) => {
+        console.error("Error while sending emails: ", e);
+        return { total: 0, sent: 0, error: 0 };
     });
+    res.status(200).json({ success: true });
 });
 
 export default app;

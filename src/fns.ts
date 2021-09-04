@@ -130,8 +130,7 @@ export const shallISendForAnniversaryGiftSelection = (user: UserCsvRow) => {
 
 export const getStorageObject = () => {
     return new Storage({
-        projectId: "ec-rolustech",
-        keyFilename: "./key.json",
+        projectId: "ec-rolustech"
     });
 };
 
