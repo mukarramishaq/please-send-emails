@@ -6,8 +6,10 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 app.use((req: Request, res: Response, next: NextFunction) => {
-    if (!req.body?.please_send_emails) {
-        throw new Error("Wrong message");
+    const body = req.body;
+    if (!body.message || !body.message.please_send_emails) {
+        console.log("MKDEBUG: ", body.message);
+        throw new Error("Not a valid message");
     }
     next();
 }); // apply message validator of required vendor
