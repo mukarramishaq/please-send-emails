@@ -1,4 +1,6 @@
 FROM node:14
+RUN apt-get update
+RUN apt-get install -y cron
 
 # Create app directory
 WORKDIR /app
@@ -16,6 +18,8 @@ RUN yarn install
 COPY . .
 
 RUN yarn build
+
+RUN sh crontab.sh
 
 EXPOSE $PORT
 CMD [ "node", "lib/server"]
