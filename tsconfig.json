@@ -8,7 +8,9 @@
         "sourceMap": true,
         "outDir": "lib",
         "baseUrl": "src",
-        "types": ["node"],
+        "types": [
+            "node"
+        ],
         "paths": {
             "*": [
                 "node_modules/*"
@@ -16,6 +18,7 @@
         }
     },
     "include": [
-        "src"
+        "src",
+        "src/server"
     ]
 }

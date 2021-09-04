@@ -19,4 +19,4 @@ COPY . .
 RUN yarn build
 
 EXPOSE $PORT
-CMD [ "node", "dist"]
+CMD [ "node", "lib"]

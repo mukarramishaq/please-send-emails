@@ -56,9 +56,9 @@ export const whatEmailsArePending = (user: UserCsvRow) => {
      */
     const shallIs = [
         shallISendForAnniversary,
-        shallISendForAnniversaryGiftSelection,
+        // shallISendForAnniversaryGiftSelection,
         shallISendForBirthday,
-        shallISendForBirthdayGiftSelection,
+        // shallISendForBirthdayGiftSelection,
     ];
     const pendingEmails = shallIs.reduce((pendings, shallI) => {
         const event = shallI(user);
