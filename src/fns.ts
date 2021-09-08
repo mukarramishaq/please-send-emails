@@ -11,7 +11,7 @@ import {
 import * as hbs from "handlebars";
 import * as fs from "fs";
 import * as path from "path";
-import { SMTP_CREDENTIALS, EMAIL_USERS, GOOGLE_BUCKET_NAME } from "./env";
+import { SMTP_CREDENTIALS, EMAIL_USERS, GOOGLE } from "./env";
 import {
     getMonth,
     getDate,
@@ -130,17 +130,17 @@ export const shallISendForAnniversaryGiftSelection = (user: UserCsvRow) => {
 
 export const getStorageObject = () => {
     return new Storage({
-        projectId: "ec-rolustech",
-        keyFilename: "./key.json",
+        projectId: GOOGLE.PROJECT_ID,
+        keyFilename: GOOGLE.KEY_FILE_PATH,
     });
 };
 
 export const getBucket = () => {
-    return getStorageObject().bucket(GOOGLE_BUCKET_NAME);
+    return getStorageObject().bucket(GOOGLE.BUCKET_NAME);
 };
 
 export const getReadableStreamOfFile = (filePath: string) => {
-    if (GOOGLE_BUCKET_NAME) {
+    if (GOOGLE.BUCKET_NAME) {
         return getBucket().file(filePath).createReadStream();
     }
     return fs.createReadStream(path.resolve(__dirname, "assets", filePath));
@@ -189,7 +189,7 @@ export const processAttachments = async (
                 path: processedPath,
             };
             try {
-                if (GOOGLE_BUCKET_NAME) {
+                if (GOOGLE.BUCKET_NAME) {
                     const filePath = formattedAttachment.path;
                     formattedAttachment.content = getReadableStreamOfFile(
                         filePath
