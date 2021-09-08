@@ -1,5 +1,5 @@
 {
-  "version": "0.3.0",
+  "version": "0.4.0",
   "license": "MIT",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
@@ -22,6 +22,7 @@
   "peerDependencies": {},
   "dependencies": {
     "@google-cloud/storage": "^5.14.0",
+    "@types/stream-to-string": "^1.2.0",
     "cookie-parser": "~1.4.4",
     "date-fns": "^2.22.1",
     "debug": "~2.6.9",
@@ -31,6 +32,7 @@
     "morgan": "~1.9.1",
     "node-fetch": "^2.6.1",
     "nodemailer": "^6.6.3",
+    "stream-to-string": "^1.2.0",
     "typescript-json-validator": "^2.4.2",
     "winston": "^3.3.3"
   },
@@ -40,7 +42,7 @@
     }
   },
   "prettier": {
-    "tabWidth": 4,
+    "tabWidth": 2,
     "printWidth": 80,
     "trailingComma": "es5"
   },

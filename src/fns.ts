@@ -1,5 +1,5 @@
-import { createTransport } from 'nodemailer';
-import SMTPTransport from 'nodemailer/lib/smtp-transport';
+import { createTransport } from "nodemailer";
+import SMTPTransport from "nodemailer/lib/smtp-transport";
 import {
   ALLOWED_GIFTED_ANNIVERSARIES,
   Attachment,
@@ -7,11 +7,11 @@ import {
   SEND_GIFT_SELECTION_EMAIL_BEFORE,
   TemplateRegistry,
   UserCsvRow,
-} from './types';
-import * as hbs from 'handlebars';
-import * as fs from 'fs';
-import * as path from 'path';
-import { SMTP_CREDENTIALS, EMAIL_USERS, GOOGLE } from './env';
+} from "./types";
+import * as hbs from "handlebars";
+import * as fs from "fs";
+import * as path from "path";
+import { SMTP_CREDENTIALS, EMAIL_USERS, GOOGLE } from "./env";
 import {
   format as formatDate,
   differenceInYears,
@@ -19,12 +19,13 @@ import {
   isToday,
   setYear,
   getYear,
-} from 'date-fns';
-import { REGISTERED_EMAIL_TEMPLATES } from './emailTemplatesRegister';
-import { createLogger, format, transports } from 'winston';
-import { pleaseGetContext } from './context';
-import { Storage } from '@google-cloud/storage';
-import { Readable } from 'nodemailer/lib/xoauth2';
+} from "date-fns";
+import { REGISTERED_EMAIL_TEMPLATES } from "./emailTemplatesRegister";
+import { createLogger, format, transports } from "winston";
+import { pleaseGetContext } from "./context";
+import { Storage } from "@google-cloud/storage";
+import { Readable } from "nodemailer/lib/xoauth2";
+import streamToString from "stream-to-string";
 
 const { timestamp, prettyPrint } = format;
 
@@ -144,7 +145,11 @@ export const getReadableStreamOfFile = (filePath: string) => {
       .file(filePath)
       .createReadStream();
   }
-  return fs.createReadStream(path.resolve(__dirname, 'assets', filePath));
+  return fs.createReadStream(path.resolve(__dirname, "assets", filePath));
+};
+
+export const getFileContents = async (filePath: string) => {
+  return await streamToString(getReadableStreamOfFile(filePath));
 };
 
 /**
@@ -191,7 +196,7 @@ export const processAttachments = async (
         } else {
           formattedAttachment.path = path.resolve(
             __dirname,
-            'assets',
+            "assets",
             formattedAttachment.path
           );
         }
@@ -224,22 +229,9 @@ export const pleaseCompileRegisteredTemplate = async (
   template: TemplateRegistry,
   context: any
 ) => {
-  const fileContents: string = await new Promise((resolve, reject) => {
-    fs.readFile(
-      path.resolve(
-        __dirname,
-        'assets',
-        'email-templates',
-        `${template.id}.html`
-      ),
-      (error, data) => {
-        if (error) {
-          reject(error);
-        }
-        resolve(data.toString());
-      }
-    );
-  });
+  const fileContents: string = await getFileContents(
+    `email-templates/${template.id}.html`
+  );
   const compiledTemplate = hbs.compile(fileContents);
   const html = compiledTemplate(context);
   return html;
@@ -256,7 +248,7 @@ export const pleaseCompileTemplate = (template: string, context: any) => {
 
 export const emailSuccessLogger = createLogger({
   format: format.combine(
-    format.label({ label: 'Emails' }),
+    format.label({ label: "Emails" }),
     timestamp(),
     prettyPrint()
   ),
@@ -264,7 +256,7 @@ export const emailSuccessLogger = createLogger({
     new transports.File({
       filename: `logs/success_emails_${formatDate(
         new Date(),
-        'yyyy-MM-dd'
+        "yyyy-MM-dd"
       )}.log`,
     }),
   ],
@@ -272,7 +264,7 @@ export const emailSuccessLogger = createLogger({
 
 export const emailErrorLogger = createLogger({
   format: format.combine(
-    format.label({ label: 'Emails' }),
+    format.label({ label: "Emails" }),
     timestamp(),
     prettyPrint()
   ),
@@ -281,7 +273,7 @@ export const emailErrorLogger = createLogger({
       handleExceptions: true,
     }),
     new transports.File({
-      filename: `logs/error_emails_${formatDate(new Date(), 'yyyy-MM-dd')}.log`,
+      filename: `logs/error_emails_${formatDate(new Date(), "yyyy-MM-dd")}.log`,
       handleExceptions: true,
     }),
   ],
@@ -294,7 +286,7 @@ export const emailErrorLogger = createLogger({
  */
 export const withOrdinal = (n: number) => {
   const ordinal =
-    ['st', 'nd', 'rd'][(((((n < 0 ? -n : n) + 90) % 100) - 10) % 10) - 1] ||
-    'th';
+    ["st", "nd", "rd"][(((((n < 0 ? -n : n) + 90) % 100) - 10) % 10) - 1] ||
+    "th";
   return `${n}${ordinal}`;
 };
