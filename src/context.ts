@@ -5,7 +5,6 @@ import {
     UserCsvRow,
 } from "./types";
 import { differenceInYears } from "date-fns";
-import { withOrdinal } from "./fns";
 import { GIFT_SELECTION_FORM_LINK } from "./env";
 
 /**
@@ -120,3 +119,17 @@ export const pleaseGetContext = (
     }
     return contextHandler(template, user);
 };
+
+
+
+/**
+ * convert simple number to string with ordinal like 1st, 2nd, 24th
+ *
+ * @param n
+ */
+export const withOrdinal = (n: number) => {
+    const ordinal =
+      ['st', 'nd', 'rd'][(((((n < 0 ? -n : n) + 90) % 100) - 10) % 10) - 1] ||
+      'th';
+    return `${n}${ordinal}`;
+  };

@@ -1,18 +1,25 @@
 {
-  "name": "please-send-emails",
-  "version": "0.0.0-development",
-  "private": false,
+  "version": "0.1.0",
+  "license": "MIT",
   "main": "dist/index.js",
-  "scripts": {
-    "prebuild": "tslint -c tslint.json -p tsconfig.json --fix && del ./lib",
-    "build": "tsc",
-    "postbuild": "cpy 'assets' '!**/*.ts' ../lib/ --cwd=src/ --no-overwrite --parents",
-    "prestart": "npm run build",
-    "start": "node ./lib",
-    "please-send-emails": "node ./lib",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "semantic-release": "semantic-release"
+  "typings": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "engines": {
+    "node": ">=10"
   },
+  "scripts": {
+    "start": "tsdx watch",
+    "build": "tsdx build",
+    "test": "tsdx test",
+    "lint": "tsdx lint",
+    "prepare": "tsdx build",
+    "size": "size-limit",
+    "analyze": "size-limit --why"
+  },
+  "peerDependencies": {},
   "dependencies": {
     "@google-cloud/storage": "^5.14.0",
     "cookie-parser": "~1.4.4",
@@ -27,6 +34,29 @@
     "typescript-json-validator": "^2.4.2",
     "winston": "^3.3.3"
   },
+  "husky": {
+    "hooks": {
+      "pre-commit": "tsdx lint"
+    }
+  },
+  "prettier": {
+    "tabWidth": 4,
+    "printWidth": 80,
+    "trailingComma": "es5"
+  },
+  "name": "please-send-emails",
+  "author": "Mukarram Ishaq",
+  "module": "dist/please-send-emails.esm.js",
+  "size-limit": [
+    {
+      "path": "dist/please-send-emails.cjs.production.min.js",
+      "limit": "10 KB"
+    },
+    {
+      "path": "dist/please-send-emails.esm.js",
+      "limit": "10 KB"
+    }
+  ],
   "devDependencies": {
     "@types/cookie-parser": "^1.4.2",
     "@types/debug": "^4.1.5",
@@ -41,14 +71,11 @@
     "cpy-cli": "^2.0.0",
     "del-cli": "^3.0.0",
     "semantic-release": "^17.4.4",
-    "tslint": "^6.1.3",
-    "typescript": "^4.3.4"
-  },
-  "prettier": {
-    "tabWidth": 4
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/mukarramishaq/please-send-emails.git"
+    "@size-limit/preset-small-lib": "^5.0.3",
+    "husky": "^7.0.2",
+    "size-limit": "^5.0.3",
+    "tsdx": "^0.14.1",
+    "tslib": "^2.3.1",
+    "typescript": "^4.4.2"
   }
 }

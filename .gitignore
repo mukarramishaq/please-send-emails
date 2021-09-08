@@ -1,3 +1,7 @@
+*.log
+.DS_Store
+node_modules
+dist
 node_modules
 yarn.lock
 dist
@@ -6,5 +10,3 @@ logs
 *.log
 .env
 key.json
-src/assets/images
-src/assets/csvs

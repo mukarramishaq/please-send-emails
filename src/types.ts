@@ -17,7 +17,7 @@ export interface UserProcessedRow {
 export type TemplateRegistry = {
     id: EVENT_TYPES; // must be unique and must match with template name without extension
     subject: string;
-    attachments?: Attachment[];
+    attachments: Attachment[];
 };
 
 export type Attachment = {
