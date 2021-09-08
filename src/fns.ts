@@ -13,7 +13,6 @@ import * as fs from "fs";
 import * as path from "path";
 import { SMTP_CREDENTIALS, EMAIL_USERS, GOOGLE } from "./env";
 import {
-  format as formatDate,
   differenceInYears,
   subDays,
   isToday,
@@ -21,13 +20,10 @@ import {
   getYear,
 } from "date-fns";
 import { REGISTERED_EMAIL_TEMPLATES } from "./emailTemplatesRegister";
-import { createLogger, format, transports } from "winston";
 import { pleaseGetContext } from "./context";
 import { Storage } from "@google-cloud/storage";
 import { Readable } from "nodemailer/lib/xoauth2";
 import streamToString from "stream-to-string";
-
-const { timestamp, prettyPrint } = format;
 
 export const pleaseSendEmailsIfPending = async (user: UserCsvRow) => {
   const pendings = whatEmailsArePending(user);
@@ -245,39 +241,6 @@ export const pleaseCompileRegisteredTemplate = async (
 export const pleaseCompileTemplate = (template: string, context: any) => {
   return hbs.compile(template)(context);
 };
-
-export const emailSuccessLogger = createLogger({
-  format: format.combine(
-    format.label({ label: "Emails" }),
-    timestamp(),
-    prettyPrint()
-  ),
-  transports: [
-    new transports.File({
-      filename: `logs/success_emails_${formatDate(
-        new Date(),
-        "yyyy-MM-dd"
-      )}.log`,
-    }),
-  ],
-});
-
-export const emailErrorLogger = createLogger({
-  format: format.combine(
-    format.label({ label: "Emails" }),
-    timestamp(),
-    prettyPrint()
-  ),
-  transports: [
-    new transports.Console({
-      handleExceptions: true,
-    }),
-    new transports.File({
-      filename: `logs/error_emails_${formatDate(new Date(), "yyyy-MM-dd")}.log`,
-      handleExceptions: true,
-    }),
-  ],
-});
 
 /**
  * convert simple number to string with ordinal like 1st, 2nd, 24th

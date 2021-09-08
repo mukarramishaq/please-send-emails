@@ -2,8 +2,6 @@ import * as csv from "fast-csv";
 import { UserCsvRow } from "./types";
 import {
     pleaseSendEmailsIfPending,
-    emailSuccessLogger,
-    emailErrorLogger,
     getReadableStreamOfFile,
 } from "./fns";
 
@@ -33,7 +31,7 @@ export const readFileAndSendEmails = async (): Promise<COUNTS> => {
                 pleaseSendEmailsIfPending(row)
                     .then(async (sentEmails) => {
                         sentEmails.map((sentOne) => {
-                            emailSuccessLogger.log(
+                            console.log(
                                 "info",
                                 `${sentOne.template.id} to ${row.email}`,
                                 sentOne.sentMsg
@@ -46,7 +44,7 @@ export const readFileAndSendEmails = async (): Promise<COUNTS> => {
                     .catch((e) => {
                         counts.error += 1;
                         console.log("Total rows error: ", counts.error);
-                        emailErrorLogger.log("error", e.message, e);
+                        console.error("error", e.message, e);
                         next();
                     });
             })
