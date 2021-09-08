@@ -37,4 +37,4 @@ export const ALLOWED_GIFTED_ANNIVERSARIES = [1, 5, 10, 15, 20];
 
 export const SEND_GIFT_SELECTION_EMAIL_BEFORE = 20; // in days
 
-export const NUMBER_OF_BIRTHDAY_CARDS = 17;
+export const NUMBER_OF_BIRTHDAY_CARDS = 16;
