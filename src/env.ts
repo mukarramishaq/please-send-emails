@@ -1,6 +1,7 @@
 import { config } from "dotenv";
 config();
 import SMTPTransport from "nodemailer/lib/smtp-transport";
+import { EVENT_TYPES } from "./types";
 /**
  * Sender and recipients email addresses and their names
  */
@@ -9,6 +10,26 @@ export const EMAIL_USERS = {
     to: process.env.EMAIL_TO,
     cc: process.env.EMAIL_CC,
     bcc: process.env.EMAIL_BCC,
+};
+
+export const DONT_CC = {
+    [EVENT_TYPES.ANNIVERSARY]: process.env.DONT_CC_HAPPY_ANNIVERSARY,
+    [EVENT_TYPES.GIFT_SELECTION_ANNIVERSARY]:
+        process.env.DONT_CC_GIFT_SELECTION_ANNIVERSARY,
+    [EVENT_TYPES.BIRTHDAY]: process.env.DONT_CC_HAPPY_BIRTHDAY,
+    [EVENT_TYPES.GIFT_SELECTION_BIRTHDAY]:
+        process.env.DONT_CC_GIFT_SELECTION_BIRTHDAY,
+};
+
+export const ALLOWED_EVENTS = {
+    [EVENT_TYPES.ANNIVERSARY]: !!(process.env.ALLOW_HAPPY_ANNIVERSARY || false),
+    [EVENT_TYPES.BIRTHDAY]: !!(process.env.ALLOW_HAPPY_BIRTHDAY || false),
+    [EVENT_TYPES.GIFT_SELECTION_ANNIVERSARY]: !!(
+        process.env.ALLOW_GIFT_SELECTION_FOR_ANNIVERSARY || false
+    ),
+    [EVENT_TYPES.GIFT_SELECTION_BIRTHDAY]: !!(
+        process.env.ALLOW_GIFT_SELECTION_FOR_BIRTHDAY || false
+    ),
 };
 
 export const GOOGLE = {

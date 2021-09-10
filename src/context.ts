@@ -24,10 +24,9 @@ export const contextHandlers = {
         );
         return {
             userName: user.name,
-            filename: `${
-                (Math.floor(Math.random() * 1000) % NUMBER_OF_BIRTHDAY_CARDS) +
-                1
-            }.png`,
+            filename: `${(Math.floor(Math.random() * 1000) %
+                NUMBER_OF_BIRTHDAY_CARDS) +
+                1}.png`,
             ...attachmentUrls,
         };
     },
@@ -120,8 +119,6 @@ export const pleaseGetContext = (
     return contextHandler(template, user);
 };
 
-
-
 /**
  * convert simple number to string with ordinal like 1st, 2nd, 24th
  *
@@ -129,7 +126,7 @@ export const pleaseGetContext = (
  */
 export const withOrdinal = (n: number) => {
     const ordinal =
-      ['st', 'nd', 'rd'][(((((n < 0 ? -n : n) + 90) % 100) - 10) % 10) - 1] ||
-      'th';
+        ["st", "nd", "rd"][(((((n < 0 ? -n : n) + 90) % 100) - 10) % 10) - 1] ||
+        "th";
     return `${n}${ordinal}`;
-  };
+};

@@ -1,23 +1,29 @@
 import { createTransport } from "nodemailer";
 import SMTPTransport from "nodemailer/lib/smtp-transport";
 import {
-  ALLOWED_GIFTED_ANNIVERSARIES,
-  Attachment,
-  EVENT_TYPES,
-  SEND_GIFT_SELECTION_EMAIL_BEFORE,
-  TemplateRegistry,
-  UserCsvRow,
+    ALLOWED_GIFTED_ANNIVERSARIES,
+    Attachment,
+    EVENT_TYPES,
+    SEND_GIFT_SELECTION_EMAIL_BEFORE,
+    TemplateRegistry,
+    UserCsvRow,
 } from "./types";
 import * as hbs from "handlebars";
 import * as fs from "fs";
 import * as path from "path";
-import { SMTP_CREDENTIALS, EMAIL_USERS, GOOGLE } from "./env";
 import {
-  differenceInYears,
-  subDays,
-  isToday,
-  setYear,
-  getYear,
+    SMTP_CREDENTIALS,
+    EMAIL_USERS,
+    GOOGLE,
+    ALLOWED_EVENTS,
+    DONT_CC,
+} from "./env";
+import {
+    differenceInYears,
+    subDays,
+    isToday,
+    setYear,
+    getYear,
 } from "date-fns";
 import { REGISTERED_EMAIL_TEMPLATES } from "./emailTemplatesRegister";
 import { pleaseGetContext } from "./context";
@@ -26,16 +32,16 @@ import { Readable } from "nodemailer/lib/xoauth2";
 import streamToString from "stream-to-string";
 
 export const pleaseSendEmailsIfPending = async (user: UserCsvRow) => {
-  const pendings = whatEmailsArePending(user);
-  return await Promise.all(
-    pendings.map(async template => {
-      const sentMsg = await pleaseSendEmail(user, template);
-      return {
-        sentMsg,
-        template,
-      };
-    })
-  );
+    const pendings = whatEmailsArePending(user);
+    return await Promise.all(
+        pendings.map(async template => {
+            const sentMsg = await pleaseSendEmail(user, template);
+            return {
+                sentMsg,
+                template,
+            };
+        })
+    );
 };
 
 /**
@@ -44,28 +50,33 @@ export const pleaseSendEmailsIfPending = async (user: UserCsvRow) => {
  * @param user
  */
 export const whatEmailsArePending = (user: UserCsvRow) => {
-  /**
-   * all the functions in shallIs array are there
-   * to determine whether an email is pending
-   * for a specific event for this user
-   */
-  const shallIs = [
-    shallISendForAnniversary,
-    shallISendForAnniversaryGiftSelection,
-    shallISendForBirthday,
-    shallISendForBirthdayGiftSelection,
-  ];
-  const pendingEmails = shallIs.reduce((pendings, shallI) => {
-    const event = shallI(user);
-    if (event) {
-      const template = REGISTERED_EMAIL_TEMPLATES.filter(
-        t => t.id === event
-      ).pop();
-      template && pendings.push(template);
-    }
-    return pendings;
-  }, [] as Array<TemplateRegistry>);
-  return pendingEmails;
+    /**
+     * all the functions in shallIs array are there
+     * to determine whether an email is pending
+     * for a specific event for this user
+     */
+    const shallIs = [
+        ALLOWED_EVENTS[EVENT_TYPES.ANNIVERSARY] && shallISendForAnniversary,
+        ALLOWED_EVENTS[EVENT_TYPES.GIFT_SELECTION_ANNIVERSARY] &&
+            shallISendForAnniversaryGiftSelection,
+        ALLOWED_EVENTS[EVENT_TYPES.BIRTHDAY] && shallISendForBirthday,
+        ALLOWED_EVENTS[EVENT_TYPES.GIFT_SELECTION_BIRTHDAY] &&
+            shallISendForBirthdayGiftSelection,
+    ].filter(f => !!f); // filter out the not allowed
+    const pendingEmails = shallIs.reduce((pendings, shallI) => {
+        if (!shallI) {
+            return pendings;
+        }
+        const event = shallI(user);
+        if (event) {
+            const template = REGISTERED_EMAIL_TEMPLATES.filter(
+                t => t.id === event
+            ).pop();
+            template && pendings.push(template);
+        }
+        return pendings;
+    }, [] as Array<TemplateRegistry>);
+    return pendingEmails;
 };
 
 /**
@@ -74,9 +85,9 @@ export const whatEmailsArePending = (user: UserCsvRow) => {
  * @param date
  */
 export const shallISendForBirthday = (user: UserCsvRow) => {
-  const date = new Date(user.birth_date);
-  const today = new Date();
-  return isToday(setYear(date, getYear(today))) && EVENT_TYPES.BIRTHDAY;
+    const date = new Date(user.birth_date);
+    const today = new Date();
+    return isToday(setYear(date, getYear(today))) && EVENT_TYPES.BIRTHDAY;
 };
 
 /**
@@ -85,13 +96,13 @@ export const shallISendForBirthday = (user: UserCsvRow) => {
  * @param date
  */
 export const shallISendForBirthdayGiftSelection = (user: UserCsvRow) => {
-  const date = new Date(user.birth_date);
-  const dueDate = subDays(date, SEND_GIFT_SELECTION_EMAIL_BEFORE); // before how many days
-  const today = new Date();
-  return (
-    isToday(setYear(dueDate, getYear(today))) &&
-    EVENT_TYPES.GIFT_SELECTION_BIRTHDAY
-  );
+    const date = new Date(user.birth_date);
+    const dueDate = subDays(date, SEND_GIFT_SELECTION_EMAIL_BEFORE); // before how many days
+    const today = new Date();
+    return (
+        isToday(setYear(dueDate, getYear(today))) &&
+        EVENT_TYPES.GIFT_SELECTION_BIRTHDAY
+    );
 };
 
 /**
@@ -100,10 +111,10 @@ export const shallISendForBirthdayGiftSelection = (user: UserCsvRow) => {
  * @param date
  */
 export const shallISendForAnniversary = (user: UserCsvRow) => {
-  const date = new Date(user.joining_date);
-  const today = new Date();
-  const isDue = isToday(setYear(date, getYear(today)));
-  return isDue && EVENT_TYPES.ANNIVERSARY;
+    const date = new Date(user.joining_date);
+    const today = new Date();
+    const isDue = isToday(setYear(date, getYear(today)));
+    return isDue && EVENT_TYPES.ANNIVERSARY;
 };
 
 /**
@@ -112,40 +123,42 @@ export const shallISendForAnniversary = (user: UserCsvRow) => {
  * @param date
  */
 export const shallISendForAnniversaryGiftSelection = (user: UserCsvRow) => {
-  const date = new Date(user.joining_date);
-  const dueDate = subDays(date, SEND_GIFT_SELECTION_EMAIL_BEFORE); // before how many days
-  const today = new Date();
-  const isDue = isToday(setYear(dueDate, getYear(date)));
-  const numberOfYears = differenceInYears(today, dueDate);
-  return (
-    isDue &&
-    ALLOWED_GIFTED_ANNIVERSARIES.includes(numberOfYears) &&
-    EVENT_TYPES.GIFT_SELECTION_ANNIVERSARY
-  );
+    const date = new Date(user.joining_date);
+    const dueDate = subDays(date, SEND_GIFT_SELECTION_EMAIL_BEFORE); // before how many days
+    const today = new Date();
+    const isDue = isToday(setYear(dueDate, getYear(date)));
+    const numberOfYears = differenceInYears(today, dueDate);
+    return (
+        isDue &&
+        ALLOWED_GIFTED_ANNIVERSARIES.includes(numberOfYears) &&
+        EVENT_TYPES.GIFT_SELECTION_ANNIVERSARY
+    );
 };
 
 export const getStorageObject = () => {
-  return new Storage({
-    projectId: GOOGLE.PROJECT_ID,
-    keyFilename: GOOGLE.KEY_FILE_PATH,
-  });
+    return new Storage({
+        projectId: GOOGLE.PROJECT_ID,
+        keyFilename: GOOGLE.KEY_FILE_PATH,
+    });
 };
 
 export const getBucket = () => {
-  return getStorageObject().bucket(GOOGLE.BUCKET_NAME || "please-send-emails");
+    return getStorageObject().bucket(
+        GOOGLE.BUCKET_NAME || "please-send-emails"
+    );
 };
 
 export const getReadableStreamOfFile = (filePath: string) => {
-  if (GOOGLE.BUCKET_NAME) {
-    return getBucket()
-      .file(filePath)
-      .createReadStream();
-  }
-  return fs.createReadStream(path.resolve(__dirname, "assets", filePath));
+    if (GOOGLE.BUCKET_NAME) {
+        return getBucket()
+            .file(filePath)
+            .createReadStream();
+    }
+    return fs.createReadStream(path.resolve(__dirname, "assets", filePath));
 };
 
 export const getFileContents = async (filePath: string) => {
-  return await streamToString(getReadableStreamOfFile(filePath));
+    return await streamToString(getReadableStreamOfFile(filePath));
 };
 
 /**
@@ -154,54 +167,79 @@ export const getFileContents = async (filePath: string) => {
  * @param template
  */
 export const pleaseSendEmail = async (
-  user: UserCsvRow,
-  template: TemplateRegistry
+    user: UserCsvRow,
+    template: TemplateRegistry
 ) => {
-  const tranporter = pleaseCreateTransport(SMTP_CREDENTIALS);
-  const context = pleaseGetContext(template, user);
-  const subject = pleaseCompileTemplate(template.subject, context);
-  const htmlBody = await pleaseCompileRegisteredTemplate(template, context);
-  const attachments = await processAttachments(template.attachments, context);
-  return tranporter.sendMail({
-    ...EMAIL_USERS,
-    to: `${user.name} <${user.email}>`,
-    subject,
-    html: htmlBody,
-    attachments,
-  });
+    const tranporter = pleaseCreateTransport(SMTP_CREDENTIALS);
+    const context = pleaseGetContext(template, user);
+    const subject = pleaseCompileTemplate(template.subject, context);
+    const htmlBody = await pleaseCompileRegisteredTemplate(template, context);
+    const attachments = await processAttachments(template.attachments, context);
+    return tranporter.sendMail({
+        ...EMAIL_USERS,
+        to: `${user.name} <${user.email}>`,
+        cc: processCCEMailUsers(EMAIL_USERS.cc || "", template),
+        subject,
+        html: htmlBody,
+        attachments,
+    });
+};
+
+export const processCCEMailUsers = (cc: string, template: TemplateRegistry) => {
+    const dontCCs = DONT_CC[template.id]
+        ?.split(",")
+        .map(s => s.trim().toLowerCase());
+    if (!dontCCs) {
+        return cc;
+    }
+    return cc
+        .split(",")
+        .filter(s => !dontCCs.includes(s.trim().toLowerCase()))
+        .join(",");
 };
 
 export const processAttachments = async (
-  attachments: Attachment[],
-  context: any
+    attachments: Attachment[],
+    context: any
 ) => {
-  return await Promise.all(
-    attachments.map(async attachment => {
-      const filename = pleaseCompileTemplate(attachment.filename, context);
-      const processedPath = pleaseCompileTemplate(attachment.path, context);
-      const formattedAttachment: Attachment & { content?: Readable } = {
-        ...attachment,
-        filename,
-        path: processedPath,
-      };
-      try {
-        if (GOOGLE.BUCKET_NAME) {
-          const filePath = formattedAttachment.path;
-          formattedAttachment.content = getReadableStreamOfFile(filePath);
-          delete formattedAttachment.path;
-        } else {
-          formattedAttachment.path = path.resolve(
-            __dirname,
-            "assets",
-            formattedAttachment.path
-          );
-        }
-      } catch (e) {
-        console.error(`Error occurred while processing attachments: `, e);
-      }
-      return formattedAttachment;
-    })
-  );
+    return await Promise.all(
+        attachments.map(async attachment => {
+            const filename = pleaseCompileTemplate(
+                attachment.filename,
+                context
+            );
+            const processedPath = pleaseCompileTemplate(
+                attachment.path,
+                context
+            );
+            const formattedAttachment: Attachment & { content?: Readable } = {
+                ...attachment,
+                filename,
+                path: processedPath,
+            };
+            try {
+                if (GOOGLE.BUCKET_NAME) {
+                    const filePath = formattedAttachment.path;
+                    formattedAttachment.content = getReadableStreamOfFile(
+                        filePath
+                    );
+                    delete formattedAttachment.path;
+                } else {
+                    formattedAttachment.path = path.resolve(
+                        __dirname,
+                        "assets",
+                        formattedAttachment.path
+                    );
+                }
+            } catch (e) {
+                console.error(
+                    `Error occurred while processing attachments: `,
+                    e
+                );
+            }
+            return formattedAttachment;
+        })
+    );
 };
 
 /**
@@ -210,9 +248,9 @@ export const processAttachments = async (
  * @param smptCredentials
  */
 export const pleaseCreateTransport = (
-  smptCredentials: SMTPTransport | SMTPTransport.Options | string
+    smptCredentials: SMTPTransport | SMTPTransport.Options | string
 ) => {
-  return createTransport(smptCredentials);
+    return createTransport(smptCredentials);
 };
 
 /**
@@ -222,15 +260,15 @@ export const pleaseCreateTransport = (
  * @param context any
  */
 export const pleaseCompileRegisteredTemplate = async (
-  template: TemplateRegistry,
-  context: any
+    template: TemplateRegistry,
+    context: any
 ) => {
-  const fileContents: string = await getFileContents(
-    `email-templates/${template.id}.html`
-  );
-  const compiledTemplate = hbs.compile(fileContents);
-  const html = compiledTemplate(context);
-  return html;
+    const fileContents: string = await getFileContents(
+        `email-templates/${template.id}.html`
+    );
+    const compiledTemplate = hbs.compile(fileContents);
+    const html = compiledTemplate(context);
+    return html;
 };
 
 /**
@@ -239,7 +277,7 @@ export const pleaseCompileRegisteredTemplate = async (
  * @param context
  */
 export const pleaseCompileTemplate = (template: string, context: any) => {
-  return hbs.compile(template)(context);
+    return hbs.compile(template)(context);
 };
 
 /**
@@ -248,8 +286,8 @@ export const pleaseCompileTemplate = (template: string, context: any) => {
  * @param n
  */
 export const withOrdinal = (n: number) => {
-  const ordinal =
-    ["st", "nd", "rd"][(((((n < 0 ? -n : n) + 90) % 100) - 10) % 10) - 1] ||
-    "th";
-  return `${n}${ordinal}`;
+    const ordinal =
+        ["st", "nd", "rd"][(((((n < 0 ? -n : n) + 90) % 100) - 10) % 10) - 1] ||
+        "th";
+    return `${n}${ordinal}`;
 };
